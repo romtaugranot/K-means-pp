@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from math import sqrt
 from numpy import random
+import mykmeanssp
 
 
 # *** Argument reading and processing *** #
@@ -23,7 +24,7 @@ def read_arguments():
 
     if len(sys.argv) == 6:  # In case iter is provided
         try:
-            iter = int(sys.argv[1])
+            iter = int(sys.argv[2])
         except ValueError:
             flag_iter = False
 
@@ -117,7 +118,7 @@ def init_centroids(data, K):
         new_centroid = data.iloc[l].values
         centroids.append(new_centroid)
         centroids_index.append(idx[l])
-
+    
     return centroids, centroids_index
 
 
@@ -130,6 +131,14 @@ def print_centroids(centroids, centroids_index):
         print(str1)
 
 
+def put_centroids_at_start(data, centroids, centroids_index):
+    for i, index in enumerate(centroids_index):
+        data.remove(data[index-i])
+    data = centroids + data
+    return data
+    
+
+
 def k_means_pp_algorithm():
     flag_K, flag_iter, K, iter, eps, data = initialize()
     valid_args = check_arguments(flag_K, flag_iter, K, data.shape[0], iter)
@@ -137,9 +146,16 @@ def k_means_pp_algorithm():
     if valid_args:
         np.random.seed(0)
         centroids, centroids_index = init_centroids(data, K)
-        # centroids, centroids_index = mykmeanssp.fit(data, centroids, iter, eps)
+
+        for i in range(0, len(centroids)):
+            centroids[i] = centroids[i].tolist()
+
+        data = data.values.tolist()
+
+        data = put_centroids_at_start(data, centroids, centroids_index)
+
+        centroids = mykmeanssp.fit(data, iter, eps, K)
 
         print_centroids(centroids, centroids_index)
-
 
 k_means_pp_algorithm()
