@@ -39,7 +39,7 @@ void print_centroids(struct vector *centroids);
 int check_argument(int smallest, char arg[], int largest);
 int is_number(char number[]);
 
-struct vector* k_means(struct vector *vectors);
+struct vector* k_means(struct vector *vectors, struct vector *centroids);
 struct vector* copy_first_K_vectors(struct vector* vectors);
 struct entry* copy_entries(struct entry* original_entries);
 struct vector** assign_data_points_to_clusters(struct vector *data_points, struct vector *centroids);
@@ -65,47 +65,7 @@ static PyObject* convert_from_c_to_python(struct vector* centroids);
 
 /* Code */
 int main(int argc, char *argv[]) {
-    struct vector *vectors;
-    int flag_K = 0, flag_iter = 1;
-    struct vector *centroids;
-
-    vectors = read_data_points();
-
-    /* Check validity of arguments */
-    flag_K = check_argument(1, argv[1], N);
-
-    if (argc == 3)
-        flag_iter = check_argument(1, argv[2], 1000);
-
-    /* Execute algorithm only if arguments are valid */
-    if (flag_K == 1 && flag_iter == 1) {
-
-        /* Get K and iter */
-        K = atoi(argv[1]);
-        iter = argc == 3 ? atoi(argv[2]) : 200;
-
-
-        /* Execute K-means algorithm */
-        centroids = k_means(vectors);
-        print_centroids(centroids);
-
-        free_centroids(centroids);
-        free_vectors(vectors);
-        free_backups();
-
-
-        return 0;
-    }
-
-    /* Otherwise raise error messages */
-    else {
-        free_backups();
-        if (flag_K == 0)
-            printf("Invalid number of clusters!\n");
-        if (flag_iter == 0)
-            printf("Invalid maximum iteration!\n");
-        return 1;
-    }
+    return 0;
 }
 
 /** Argument reading and processing **/
@@ -245,14 +205,15 @@ int is_number(char number[]) {
 
 /*  input: Linked list of vectors.
     output: array of vectors */
-struct vector* k_means(struct vector *vectors) {
+struct vector* k_means(struct vector *vectors, struct vector *centroids_) {
     int iteration_number = 0;
     int flag_delta = 0;
     struct vector **clusters;
     struct vector *new_centroids, *centroids;
 
+    centroids = copy_first_K_vectors(centroids_);
+
     /* Initialize centroids as first K vectors */
-    centroids = copy_first_K_vectors(vectors);
     backup_centroids = centroids;
 
     /* Repeat until convergence of centroids or until iteration_number == iter */
@@ -647,19 +608,25 @@ void free_backups(){
 static PyObject* k_means_module_imp(PyObject *self, PyObject *args)
 {
     PyObject *list_of_lists;
+    PyObject *list_of_lists2;
 
     struct vector *centroids;
     struct vector *vectors;
 
-    if(!PyArg_ParseTuple(args, "Oidi", &list_of_lists, &iter, &eps, &K)) {
+    if(!PyArg_ParseTuple(args, "OOidi", &list_of_lists, &list_of_lists2, &iter, &eps, &K)) {
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
 
+    printf("converting data...\n\n");
     vectors = convert_from_python_to_c(list_of_lists);
+    printf("converting centroids...\n\n");
+    centroids = convert_from_python_to_c(list_of_lists2);
 
-    centroids = k_means(vectors);
+    printf("calling kmeans...\n\n");
+    centroids = k_means(vectors, centroids);
 
+    printf("converting to python object...\n\n");
     PyObject *python_centroids = convert_from_c_to_python(centroids);
 
     free_centroids(centroids);
