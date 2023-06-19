@@ -129,13 +129,6 @@ def print_centroids(centroids, centroids_index):
     for centroid in centroids:
         str1 = ','.join(map(lambda x: "%.4f" % x, centroid))
         print(str1)
-
-
-def put_centroids_at_start(data, centroids, centroids_index):
-    for i, index in enumerate(centroids_index):
-        data.remove(data[index-i])
-    data = centroids + data
-    return data
     
 
 
@@ -152,9 +145,7 @@ def k_means_pp_algorithm():
 
         data = data.values.tolist()
 
-        data = put_centroids_at_start(data, centroids, centroids_index)
-
-        centroids = mykmeanssp.fit(data, iter, eps, K)
+        centroids = mykmeanssp.fit(data, centroids, iter, eps, K)
 
         print_centroids(centroids, centroids_index)
 
