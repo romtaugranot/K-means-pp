@@ -56,17 +56,21 @@ def read_arguments():
 
 def initialize():
 
+    print("read arguments...")
     # Reading user arguments
     flag_K, flag_iter, K, iter, eps, df1, df2 = read_arguments()
 
+    print("merging...")
     # Combine both input files by inner join using the first column in each file as a key
     data = pd.merge(df1, df2, on=df1.columns[0])
 
+    print("i dont know  what this is...")
     data.columns = ['index'] + [f'x{i}' for i in range(1, data.shape[1])]
 
     data['index'] = data['index'].astype(int)
     data = data.set_index('index')
 
+    print("sorting...")
     data = data.sort_index()    # Sort the data points by the key in ascending order
 
     return flag_K, flag_iter, K, iter, eps, data
@@ -122,12 +126,11 @@ def init_centroids(data, K):
     return centroids, centroids_index
 
 
-def print_centroids(centroids, centroids_index):
-    str1 = ','.join(map(str, centroids_index))
-    print(str1)
+def print_vectors(vectors):
+    str1 = ''
 
-    for centroid in centroids:
-        str1 = ','.join(map(lambda x: "%.4f" % x, centroid))
+    for vector in vectors:
+        str1 = ','.join(map(lambda x: "%.4f" % x, vector))
         print(str1)
     
 
@@ -147,6 +150,7 @@ def k_means_pp_algorithm():
 
         centroids = mykmeanssp.fit(data, centroids, iter, eps, K)
 
-        print_centroids(centroids, centroids_index)
+        print(','.join(map(str, centroids_index)))
+        print_vectors(centroids)
 
 k_means_pp_algorithm()
