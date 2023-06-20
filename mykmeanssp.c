@@ -213,6 +213,8 @@ struct vector* k_means(struct vector *vectors, struct vector *centroids_) {
 
     centroids = copy_first_K_vectors(centroids_);
 
+    printf("iter: %d, K: %d, eps: %f, N: %d, d: %d\n\n", iter, K, eps, N, d);
+
     /* Initialize centroids as first K vectors */
     backup_centroids = centroids;
 
@@ -618,10 +620,10 @@ static PyObject* k_means_module_imp(PyObject *self, PyObject *args)
                         PyObject* so it is used to signal that an error has occurred. */
     }
 
-    printf("converting data...\n\n");
-    vectors = convert_from_python_to_c(list_of_lists);
     printf("converting centroids...\n\n");
     centroids = convert_from_python_to_c(list_of_lists2);
+    printf("converting data...\n\n");
+    vectors = convert_from_python_to_c(list_of_lists);
 
     printf("calling kmeans...\n\n");
     centroids = k_means(vectors, centroids);
@@ -641,9 +643,6 @@ static struct vector* convert_from_python_to_c(PyObject *list_of_lists) {
     PyObject *item;
 
     N = PyObject_Length(list_of_lists);
-    if (N <= 0) {
-        mem_error();
-    }
     d = PyObject_Length(PyList_GetItem(list_of_lists, 0));
 
     struct vector *head_vec, *curr_vec;
