@@ -55,23 +55,20 @@ def read_arguments():
 
 
 def initialize():
-
-    print("read arguments...")
     # Reading user arguments
     flag_K, flag_iter, K, iter, eps, df1, df2 = read_arguments()
 
-    print("merging...")
     # Combine both input files by inner join using the first column in each file as a key
     data = pd.merge(df1, df2, on=df1.columns[0])
 
-    print("i dont know  what this is...")
     data.columns = ['index'] + [f'x{i}' for i in range(1, data.shape[1])]
 
     data['index'] = data['index'].astype(int)
     data = data.set_index('index')
 
-    print("sorting...")
-    data = data.sort_index()    # Sort the data points by the key in ascending order
+    # Sort the data points by the key in ascending order
+    sorted_indices = np.argsort(data.index)
+    data = data.iloc[sorted_indices]
 
     return flag_K, flag_iter, K, iter, eps, data
 
@@ -79,7 +76,6 @@ def initialize():
 # *** Algorithm *** #
 
 def check_arguments(flag_K, flag_iter, K, N, iter):
-
     flag_K = flag_K and 1 < K < N
     flag_iter = flag_iter and 1 < iter < 1000
 
@@ -96,10 +92,6 @@ def dist(x1, x2):
     return sqrt(np.sum(np.square(x1 - x2)))
 
 
-def D(x, centroids):
-    return min(dist(x, y) for y in centroids)
-
-
 def init_centroids(data, K):
     idx = data.index.tolist()
     N = data.shape[0]
@@ -114,15 +106,16 @@ def init_centroids(data, K):
 
     # Repeat until K centers have been chosen
     for _ in range(1, K):
-        distances = [D(row, centroids) for _, row in data.iterrows()]
-        sum_dist = sum(distances)
-        probabilities = [d / sum_dist for d in distances]
+        distances = np.sqrt(np.sum(np.square(data.values - np.array(centroids)[:, np.newaxis]), axis=2))
+        min_distances = np.min(distances, axis=0)
+        sum_dist = np.sum(min_distances)
+        probabilities = min_distances / sum_dist
 
         l = np.random.choice(range(N), 1, p=probabilities)[0]
         new_centroid = data.iloc[l].values
         centroids.append(new_centroid)
         centroids_index.append(idx[l])
-    
+
     return centroids, centroids_index
 
 
@@ -132,7 +125,6 @@ def print_vectors(vectors):
     for vector in vectors:
         str1 = ','.join(map(lambda x: "%.4f" % x, vector))
         print(str1)
-    
 
 
 def k_means_pp_algorithm():
@@ -152,5 +144,6 @@ def k_means_pp_algorithm():
 
         print(','.join(map(str, centroids_index)))
         print_vectors(centroids)
+
 
 k_means_pp_algorithm()
