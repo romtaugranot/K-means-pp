@@ -718,7 +718,7 @@ static PyMethodDef kmeansMethods[] = {
       (PyCFunction) k_means_module_imp, /* the C-function that implements the Python function and returns static PyObject*  */
       METH_VARARGS,           /* flags indicating parameters
 accepted for this function */
-      PyDoc_STR("A geometric series up to n. sum_up_to_n(z^n)")}, /*  The docstring for the function */
+      PyDoc_STR("An implementation of kmeans algorithm with smart initialization of the centroids.")}, /*  The docstring for the function */
     {NULL, NULL, 0, NULL}     /* The last entry must be all NULL as shown to act as a
                                  sentinel. Python looks for this entry to know that all
                                  of the functions for the module have been defined. */
