@@ -22,6 +22,10 @@ def read_arguments():
     j = 5  # Represents the index of file_name_2 in the args array, assuming iter was provided.
     flag_iter = True
 
+    if len(sys.argv) > 6 or len(sys.argv) < 5:
+        print("An Error Has Occurred")
+        exit(1)
+
     if len(sys.argv) == 6:  # In case iter is provided
         try:
             iter = int(sys.argv[2])
